@@ -3,7 +3,7 @@
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=icon\loginmajig_all2.ico
 #AutoIt3Wrapper_UseUpx=n
-#AutoIt3Wrapper_Res_Fileversion=2.0.0.5
+#AutoIt3Wrapper_Res_Fileversion=2.0.0.6
 #AutoIt3Wrapper_Res_Fileversion_AutoIncrement=y
 #AutoIt3Wrapper_Res_requestedExecutionLevel=asInvoker
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
@@ -27,7 +27,7 @@
 
 ; ================= Constants, etc ===================
 
-Const $lmj_version="2.0 BETA - NOCFTW4EVR"
+Const $lmj_version="2.1 BETA"
 
 ;Constants (all in msec)
 Global $settings_keyspeed = 60 ;SetKeySpeed() is called after the gui is setup since it reads direct from the control
@@ -173,22 +173,23 @@ _GUICtrlStatusBar_SetText($StatusBar1, "Ready")
 While 1
 	$nMsg = GUIGetMsg()
 	Switch $nMsg
-		Case $GUI_EVENT_CLOSE
+		 Case $GUI_EVENT_CLOSE
 			Exit
-		Case $GoButton
+		 Case $GoButton
+			_ArraySort($login_creds, 0,0,0,0)
 			SendLogin()
-		Case $OverridesButton
+		 Case $OverridesButton
 			ConsoleWrite("Popup menu button" & @CRLF)
 			_Popup_Menu(GUICtrlGetHandle($OverridesButton))
 			ConsoleWrite("Back from popup" & @CRLF)
 
-		Case $cMaskPassword
+		 Case $cMaskPassword
 			if(GUICtrlRead($cMaskPassword) == $GUI_CHECKED ) Then
 				_GuiCtrlEditChangePasswordChar($ctl_password, True)
 			else
 				_GuiCtrlEditChangePasswordChar($ctl_password, False)
 			EndIf
-		Case $SettingsButton
+		 Case $SettingsButton
 			GUISetState(@SW_DISABLE, $gui_main)
 			RegisterHotkeys(True) ;unregister
 			$settings_Autodetect2003 = GUICtrlRead($cAutodetect2003)
@@ -200,26 +201,26 @@ While 1
 			local $iSliderPrevVal = 100 ;note it's good to have this here so the slider gets updated to a custom position, as appropriate
 			local $iKeyValPrev = $iSliderPrevVal
 			While 1
-				;Update the slider if changed
-				$iSliderNewVal = GUICtrlRead($gKeySpeedSlider)
-				if $iSliderNewVal <> $iSliderPrevVal then
-					ConsoleWrite("Slider val changed, = "&$iSliderNewVal & @CRLF)
-					GUICtrlSetData($gKeySpeed, $iSliderNewVal)
-					$iSliderPrevVal = $iSliderNewVal
-				endif
-				;Update the slider if the inputbox changed
-				$iKeyValNew = GUICtrlRead($gKeySpeed)
-				if $iKeyValNew <> $iKeyValPrev then
-					ConsoleWrite("Key speed val changed, = "&$iKeyValNew & @CRLF)
-					GUICtrlSetData($gKeySpeedSlider, $iKeyValNew)
-					$iKeyValPrev = $iKeyValNew
-				endif
-				$msg = GUIGetMsg()
-				Switch $msg
-					Case $GUI_EVENT_CLOSE, $BtnCancel, $BtnOK
-						GUISetState(@SW_HIDE, $gui_options)
-						GUISetState(@SW_ENABLE, $gui_main)
-						WinActivate($gui_main)
+			   ;Update the slider if changed
+			   $iSliderNewVal = GUICtrlRead($gKeySpeedSlider)
+			   if $iSliderNewVal <> $iSliderPrevVal then
+				  ConsoleWrite("Slider val changed, = "&$iSliderNewVal & @CRLF)
+				  GUICtrlSetData($gKeySpeed, $iSliderNewVal)
+				  $iSliderPrevVal = $iSliderNewVal
+			   endif
+			   ;Update the slider if the inputbox changed
+			   $iKeyValNew = GUICtrlRead($gKeySpeed)
+			   if $iKeyValNew <> $iKeyValPrev then
+				  ConsoleWrite("Key speed val changed, = "&$iKeyValNew & @CRLF)
+				  GUICtrlSetData($gKeySpeedSlider, $iKeyValNew)
+				  $iKeyValPrev = $iKeyValNew
+			   endif
+			   $msg = GUIGetMsg()
+			   Switch $msg
+				  Case $GUI_EVENT_CLOSE, $BtnCancel, $BtnOK
+					 GUISetState(@SW_HIDE, $gui_options)
+					 GUISetState(@SW_ENABLE, $gui_main)
+					 WinActivate($gui_main)
 						if($msg == $BtnCancel )Then ;Reset the settings GUI
 							__SetHotkeyVal($hHotkey_dup, $settings_hotkey_dup)
 							__SetHotkeyVal($hHotkey_up, $settings_hotkey_up)
@@ -379,6 +380,10 @@ Func SendLogin($opt=0)
 				#ce
 			EndIf
 			;generate new dropdown list
+
+			;First sort the list
+			_ArraySort($login_creds, 0,0,0,0)
+
 			$user_list=''
 			for $x=0 to UBound($login_creds)-1
 				$user_list&='|'&$login_creds[$x][0]
